@@ -1,0 +1,14 @@
+{
+  "name": "NewHR",
+  "location": {
+            "street": "Tverskaya",
+                  "city": "Moscow",
+                        "country": "Russian Federation"
+                           },
+                              "employees": [
+                                   {
+                                           "name": "Alexander Majorov",
+                                                   "division": "Engineering"
+                                                        }
+                                                           ]
+                                                           }
