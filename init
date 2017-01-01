@@ -1,61 +1,21 @@
-#! /bin/bash
-GET-CONFIG() {
-	SERVER_ADDR=$(cat /home/kcp/config.json | jq .$NAME.server_address)
-	SERVER_PORT=$(cat /home/kcp/config.json | jq .$NAME.server_port)
-	KCP_PORT=$(cat /home/kcp/config.json | jq .$NAME.port)
-	KCP_PASSWD=$(cat /home/kcp/config.json | jq .$NAME.password)
-	KCP_MODE=$(cat /home/kcp/config.json | jq .$NAME.mode)		
-	KCP_OTHERS=$(cat /home/kcp/config.json | jq .$NAME.others)
-	SERVER_ADDR=${SERVER_ADDR//\"}
-	SERVER_PORT=${SERVER_PORT//\"}
-	KCP_PORT=${KCP_PORT//\"}
-	KCP_PASSWD=${KCP_PASSWD//\"}
-	KCP_MODE=${KCP_MODE//\"}
-	KCP_OTHERS=${KCP_OTHERS//\"}
-}
+#!/usr/bin/python
+import json
+from subprocess import call
 
-CHECK-CONFIG() {
-	for VARIABLE in SERVER_ADDR SERVER_PORT KCP_PORT KCP_PASSWD KCP_MODE PEN_PORT;
-	do
-		if [[ -z ${!VARIABLE} ]]; then
-			echo "Error: $VARIABLE is not defined, please check your config.json"
-			exit
-		fi  
-	done
-}
+config_file = "/home/kcpclient/config.json"
+json_data = open(config_file).read()
+config = json.loads(json_data)
 
-CLEAN-CONFIG() {
-	SERVER_ADDR=""
-	SERVER_PORT=""
-	KCP_PORT=""
-	KCP_PASSWD=""
-	KCP_MODE=""
-	KCP_OTHERS=""
-}
+pen_command = "pen -f -r -x " + config["pen"]["max_connection"] + " 127.0.0.1:" + config["pen"]["port"]
 
-RUN-KCP (){
-	client_linux_amd64 -r $SERVER_ADDR:$SERVER_PORT -l ":$KCP_PORT" -mode $KCP_MODE -key $KCP_PASSWD $KCP_OTHERS &
-}
+i=1
+while (i <= 5):
+  kcp = "kcp" + str(i)
+  if kcp in config:
+    pen_command = pen_command + " 127.0.0.1:" +  config[kcp]["port"]
+    kcp_command = "client_linux_amd64 -r " + config[kcp]["server_address"] + ":" + config[kcp]["server_port"] + " -l :" + config[kcp]["port"] + " -mode " + config[kcp]["mode"] + " --key " + config[kcp]["password"] + " " + config[kcp]["others"] + " &"
+    call(kcp_command, shell=True)
 
-INIT() {
-	cat /home/kcp/config.json | jq ..city
-	MAX_CONNECTIONS=$(cat /home/kcp/config.json | jq .pen.max_connect)
-	PEN_PORT=$(cat /home/kcp/config.json | jq .pen.port)
-	pen_commd="pen -f -r -x ${MAX_CONNECTIONS-2000} 127.0.0.1:$PEN_PORT"
-	i=1
-	while [ $i -le 5 ]; do
-		NAME="kcp$i"
-		config=$(cat /home/kcp/config.json | jq .$NAME)
-		if [ "$config" != "null" ]; then
-			GET-CONFIG							
-			CHECK-CONFIG
-			pen_commd=$pen_commd" 127.0.0.1:"$KCP_PORT
-			RUN-KCP
-			CLEAN-CONFIG
-		fi
-		i=$((i+1))
-	done
-	exec $pen_commd
-}
+  i = i + 1
 
-INIT
+call(pen_command, shell=True)

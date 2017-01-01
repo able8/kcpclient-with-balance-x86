@@ -1,0 +1,22 @@
+{
+	"pen":{
+		"port": "1080",
+		"max_connection": "2000"
+	},
+	"kcp1":{
+		"port": "2001",
+		"server_address": "127.0.0.1",
+		"server_port": "4000",
+		"password": "test",
+		"mode": "fast2",
+		"others": ""
+	},
+	"kcp2":{
+		"port": "2002",
+		"server_address": "127.0.0.1",
+		"server_port": "4002",
+		"password": "testkcp",
+		"mode": "manual",
+		"others": "--sndwnd 2048 --rcvwnd 4096 -crypt aes-128 -nodelay 0 -resend 0 -nc 1 -interval 40 -datashard 5 -parityshard 2"
+	}
+}

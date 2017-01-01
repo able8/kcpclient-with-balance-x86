@@ -11,7 +11,7 @@ ENV KCP_URL https://github.com/xtaci/kcptun/releases/download/v$KCP_VER/kcptun-l
 # build pen
 RUN apk update && \
     apk upgrade && \
-    apk add --update bash jq $PEN_DEP $KCP_DEP
+    apk add --update python bash $PEN_DEP $KCP_DEP
 
 RUN curl -sSL "$PEN_URL" | tar -xvz
 
