@@ -8,8 +8,7 @@
 		"server_address": "127.0.0.1",
 		"server_port": "4000",
 		"password": "test",
-		"mode": "fast2",
-		"others": ""
+		"mode": "fast2"
 	},
 	"kcp2":{
 		"port": "2002",

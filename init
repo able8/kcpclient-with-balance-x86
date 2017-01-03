@@ -3,19 +3,47 @@ import json
 from subprocess import call
 
 config_file = "/home/kcpclient/config.json"
-json_data = open(config_file).read()
-config = json.loads(json_data)
+config = json.loads(open(config_file).read())
+kcp_max_number = 5
 
-pen_command = "pen -f -r -x " + config["pen"]["max_connection"] + " 127.0.0.1:" + config["pen"]["port"]
+kcp_command = {}
+pen_command = ""
 
-i=1
-while (i <= 5):
-  kcp = "kcp" + str(i)
-  if kcp in config:
-    pen_command = pen_command + " 127.0.0.1:" +  config[kcp]["port"]
-    kcp_command = "client_linux_amd64 -r " + config[kcp]["server_address"] + ":" + config[kcp]["server_port"] + " -l :" + config[kcp]["port"] + " -mode " + config[kcp]["mode"] + " --key " + config[kcp]["password"] + " " + config[kcp]["others"] + " &"
-    call(kcp_command, shell=True)
+# generate a kcp command
+def kcp_command_generater(kcp_config):
+	if "others" in kcp_config:
+		kcp_cmd = "client_linux_amd64 -r " + kcp_config["server_address"] + ":" + kcp_config["server_port"] + " -l :" + kcp_config["port"] + " -mode " + kcp_config["mode"] + " --key " + kcp_config["password"] + " " + kcp_config["others"] + " &"
+	else:
+		kcp_cmd = "client_linux_amd64 -r " + kcp_config["server_address"] + ":" + kcp_config["server_port"] + " -l :" + kcp_config["port"] + " -mode " + kcp_config["mode"] + " --key " + kcp_config["password"] + " &"
+	return kcp_cmd
 
-  i = i + 1
+def command_generater():
+	# generate pen command
+	pen_command = "pen -f -r -x " + config["pen"]["max_connection"] + " 127.0.0.1:" + config["pen"]["port"]
+	
+	# generate kcp commands
+	i=1
+	while (i <= kcp_max_number):
+		kcp_name = "kcp" + str(i)
+		if kcp_name in config:
+			kcp_command[kcp_name] = kcp_command_generater(config[kcp_name])
+			# add kcp ports in pen command
+			pen_command = pen_command + " 127.0.0.1:" + config[kcp_name]["port"]
+		i = i + 1
 
-call(pen_command, shell=True)
+def init():
+	# generate commands
+	command_generater()
+
+	# run kcp commands
+	i=1
+	while (i <= kcp_max_number):
+		kcp_name = "kcp" + str(i)
+		if kcp_name in kcp_command:
+			call(kcp_command[kcp_name], shell=True)
+		i = i + 1
+
+	# run pen command
+	call(pen_command, shell=True)
+
+init()
