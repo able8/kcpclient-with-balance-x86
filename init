@@ -1,49 +1,60 @@
 #!/usr/bin/python
 import json
 from subprocess import call
+import shlex
 
 config_file = "/home/kcpclient/config.json"
-config = json.loads(open(config_file).read())
 kcp_max_number = 5
-
-kcp_command = {}
-pen_command = ""
 
 # generate a kcp command
 def kcp_command_generater(kcp_config):
+	kcp_cmd = "client_linux_amd64 -r " + kcp_config["server_address"] + ":" + kcp_config["server_port"] + " -l :" + kcp_config["port"] + " -mode " + kcp_config["mode"] + " --key " + kcp_config["password"]
+
 	if "others" in kcp_config:
-		kcp_cmd = "client_linux_amd64 -r " + kcp_config["server_address"] + ":" + kcp_config["server_port"] + " -l :" + kcp_config["port"] + " -mode " + kcp_config["mode"] + " --key " + kcp_config["password"] + " " + kcp_config["others"] + " &"
-	else:
-		kcp_cmd = "client_linux_amd64 -r " + kcp_config["server_address"] + ":" + kcp_config["server_port"] + " -l :" + kcp_config["port"] + " -mode " + kcp_config["mode"] + " --key " + kcp_config["password"] + " &"
+		kcp_cmd = kcp_cmd + " " + kcp_config["others"] 
+	kcp_cmd = kcp_cmd + " &"
+		
 	return kcp_cmd
 
-def command_generater():
+def command_generater(_config, _n):
+	kcp_command = {}
+	pen_command = ""
+
 	# generate pen command
-	pen_command = "pen -f -r -x " + config["pen"]["max_connection"] + " 127.0.0.1:" + config["pen"]["port"]
+	pen_command = "pen -f -r -x " + _config["pen"]["max_connection"] + " 127.0.0.1:" + _config["pen"]["port"]
 	
 	# generate kcp commands
 	i=1
-	while (i <= kcp_max_number):
+	while (i <= _n):
 		kcp_name = "kcp" + str(i)
-		if kcp_name in config:
-			kcp_command[kcp_name] = kcp_command_generater(config[kcp_name])
+		if kcp_name in _config:
+			kcp_command[kcp_name] = kcp_command_generater(_config[kcp_name])
 			# add kcp ports in pen command
-			pen_command = pen_command + " 127.0.0.1:" + config[kcp_name]["port"]
+			pen_command = pen_command + " 127.0.0.1:" + _config[kcp_name]["port"]
 		i = i + 1
+	return kcp_command, pen_command
 
-def init():
+def init(_file, _num):
+
+	config = json.loads(open(_file).read())
+
 	# generate commands
-	command_generater()
-
+	kcp_command, pen_command = command_generater(config, _num)
+	
 	# run kcp commands
 	i=1
-	while (i <= kcp_max_number):
+	while (i <= _num):
 		kcp_name = "kcp" + str(i)
 		if kcp_name in kcp_command:
+			#// TODO
 			call(kcp_command[kcp_name], shell=True)
+
 		i = i + 1
 
+	print pen_command
 	# run pen command
-	call(pen_command, shell=True)
+	#// TODO
+	call(shlex.split(pen_command))
 
-init()
+
+init(config_file, kcp_max_number)
