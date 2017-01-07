@@ -11,12 +11,12 @@ ENV KCP_URL https://github.com/xtaci/kcptun/releases/download/v$KCP_VER/kcptun-l
 ENV SS_VER 2.4.6
 ENV SS_URL https://github.com/shadowsocks/shadowsocks-libev/archive/v$SS_VER.tar.gz
 ENV SS_DIR shadowsocks-libev-$SS_VER
-ENV SS_DEP autoconf build-base libtool linux-headers openssl-dev
+ENV SS_DEP autoconf build-base libtool linux-headers
 
 # setup build environment
 RUN apk update && \
     apk upgrade && \
-    apk add --update bash python $PEN_DEP $SS_DEP
+    apk add --update bash python openssl-dev $PEN_DEP $SS_DEP
 
 # build pen
 RUN curl -sSL "$PEN_URL" | tar -xvz
