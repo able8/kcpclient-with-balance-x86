@@ -3,7 +3,9 @@ import json
 from subprocess import call
 import shlex
 
-config_file = "/home/kcpclient/config.json"
+path = "/home/kcpclient/"
+ss_config_file = path + "shadowsocks.json"
+config_file = path + "config.json"
 kcp_max_number = 5
 
 # generate a kcp command
@@ -17,44 +19,46 @@ def kcp_command_generater(kcp_config):
 	return kcp_cmd
 
 def command_generater(_config, _n):
-	kcp_command = {}
+	commandlist = {}
 	pen_command = ""
 
 	# generate pen command
 	pen_command = "pen -f -r -x " + _config["pen"]["max_connection"] + " 127.0.0.1:" + _config["pen"]["port"]
-	
+       
 	# generate kcp commands
 	i=1
 	while (i <= _n):
 		kcp_name = "kcp" + str(i)
 		if kcp_name in _config:
-			kcp_command[kcp_name] = kcp_command_generater(_config[kcp_name])
+			commandlist[kcp_name] = kcp_command_generater(_config[kcp_name])
 			# add kcp ports in pen command
 			pen_command = pen_command + " 127.0.0.1:" + _config[kcp_name]["port"]
 		i = i + 1
-	return kcp_command, pen_command
+
+        commandlist["pen"] = pen_command + " &"
+	return commandlist
+
+def command_runner(_commandlist):
+    # TODO
+    for key in _commandlist:
+      print "calling " + key
+      call(_commandlist[key], shell=True) 
 
 def init(_file, _num):
 
 	config = json.loads(open(_file).read())
 
 	# generate commands
-	kcp_command, pen_command = command_generater(config, _num)
-	
-	# run kcp commands
-	i=1
-	while (i <= _num):
-		kcp_name = "kcp" + str(i)
-		if kcp_name in kcp_command:
-			#// TODO
-			call(kcp_command[kcp_name], shell=True)
+	command_list = command_generater(config, _num)
 
-		i = i + 1
+        # run commands
+	command_runner(command_list)
 
-	print pen_command
-	# run pen command
-	#// TODO
-	call(shlex.split(pen_command))
+        # generate ssclient commands
+        ss_command = "ss-redir -c " + ss_config_file
 
+        # run ssclient at last
+        # TODO
+        call(shlex.split(ss_command))
 
 init(config_file, kcp_max_number)
