@@ -2,63 +2,52 @@
 import json
 from subprocess import call
 import shlex
+import os.path
 
 path = "/home/kcpclient/"
 ss_config_file = path + "shadowsocks.json"
-config_file = path + "config.json"
-kcp_max_number = 5
+pen_config_file = path + "pen.json"
+kcp_max_number = 4
 
-# generate a kcp command
-def kcp_command_generater(kcp_config):
-	kcp_cmd = "client_linux_amd64 -r " + kcp_config["server_address"] + ":" + kcp_config["server_port"] + " -l :" + kcp_config["port"] + " -mode " + kcp_config["mode"] + " --key " + kcp_config["password"]
+def command_runner(_cmdlist):
+    # TODO
+    for key in sorted(_cmdlist.iterkeys()):
+      print "calling " + key
+      call(_cmdlist[key], shell=True) 
 
-	if "others" in kcp_config:
-		kcp_cmd = kcp_cmd + " " + kcp_config["others"] 
-	kcp_cmd = kcp_cmd + " &"
-		
-	return kcp_cmd
+def command_generater():
+	if os.path.isfile(pen_config_file) == False:
+		print "File " + pen_config_file + " Not Found!"
+		return {}
+	if os.path.isfile(ss_config_file) == False:	
+		print "File " + ss_config_file + " Not Found!"
+		return {}
 
-def command_generater(_config, _n):
-	commandlist = {}
-	pen_command = ""
+	_cmdlist = {}
 
-	# generate pen command
-	pen_command = "pen -f -r -x " + _config["pen"]["max_connection"] + " 127.0.0.1:" + _config["pen"]["port"]
-       
+	# basic pen command
+	pen_config = json.loads(open(pen_config_file).read())
+	pen_cmd = "pen -f -r -x " + pen_config["max_connection"] + " 127.0.0.1:" + pen_config["port"]
+
 	# generate kcp commands
 	i=1
-	while (i <= _n):
+	while (i <= kcp_max_number):
 		kcp_name = "kcp" + str(i)
-		if kcp_name in _config:
-			commandlist[kcp_name] = kcp_command_generater(_config[kcp_name])
-			# add kcp ports in pen command
-			pen_command = pen_command + " 127.0.0.1:" + _config[kcp_name]["port"]
+		kcp_config_file = path + kcp_name + ".json"
+
+		if os.path.isfile(kcp_config_file):
+			kcp_config = json.loads(open(kcp_config_file).read())
+			_cmdlist[kcp_name] = "client_linux_amd64 -c " + kcp_config_file + " &"
+			pen_cmd = pen_cmd + " " + kcp_config["localaddr"]
 		i = i + 1
 
-        commandlist["pen"] = pen_command + " &"
-	return commandlist
+	if len(_cmdlist) == 0:
+		print "No kcp config file found in " + path + " !"
+		return {}
 
-def command_runner(_commandlist):
-    # TODO
-    for key in _commandlist:
-      print "calling " + key
-      call(_commandlist[key], shell=True) 
+	_cmdlist["pen"] = pen_cmd + " &"
+	_cmdlist["ss"] = "ss-redir -c " + ss_config_file
 
-def init(_file, _num):
+	return _cmdlist
 
-	config = json.loads(open(_file).read())
-
-	# generate commands
-	command_list = command_generater(config, _num)
-
-        # run commands
-	command_runner(command_list)
-
-        # generate ssclient commands
-        ss_command = "ss-redir -c " + ss_config_file
-
-        # run ssclient at last
-        # TODO
-        call(shlex.split(ss_command))
-
-init(config_file, kcp_max_number)
+command_runner(command_generater())

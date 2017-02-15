@@ -1,0 +1,7 @@
+{
+	"localaddr": "127.0.0.1:2001",
+	"remoteaddr": "123.123.123.123:4000",
+	"key": "testkcp",
+	"mode": "fast2",
+	"log":"kcp1.log"
+}

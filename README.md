@@ -1,5 +1,8 @@
 # kcpclient-with-balance-x86
-It starts one shadowsocks client, and no more than 4 `xtaci/kcptun` clients and uses `pen` to balance network flow, with config file `/dorry_data/kcpclient/config.json` and `/dorry_data/kcpclient/shadowsocks.json`.
+It starts one shadowsocks client, and no more than 4 `xtaci/kcptun` clients and uses `pen` to balance network flow, with config file `dorry_data/kcpclient/kcp1.json`, `/dorry_data/kcpclient/pen.json` and `/dorry_data/kcpclient/shadowsocks.json`.
+
+[kcp config file format ](https://github.com/xtaci/kcptun/blob/master/README-CN.md)
+[shadowsocks config file format](https://github.com/shadowsocks/shadowsocks/wiki/Configuration-via-Config-File)
 
 ## shadowsocks Versions
   - 2.5.6
