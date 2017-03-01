@@ -7,7 +7,7 @@ It starts one shadowsocks client, and no more than 4 `xtaci/kcptun` clients and 
 
 ##  Versions
  - shadowsocks: 2.5.6
- - kcptun: 20170120
+ - kcptun: 20170301
 
 ## How to use?
 ```
