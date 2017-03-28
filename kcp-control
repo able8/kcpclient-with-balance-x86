@@ -1,0 +1,53 @@
+#!/bin/bash
+path="/dorry_data/ss_kcp_client_conf"
+log_path="/dorry_data/kcplog"
+
+START() {
+  port="$1"
+  sudo mkdir -p $path/$port/
+  sudo cp `pwd`/config-$port.json $path/$port/config.json
+
+  #docker run -itd --privileged --restart=always --cap-add=NET_ADMIN --net=host -v $path/$port:/home/sskcpclient -v $log_path/$port:/home/kcplog --name router_kcp_$port dorrypizza/kcpclient-with-balance-x86:0.2.0
+  docker run -itd --privileged --restart=always --cap-add=NET_ADMIN --net=host -v $path/$port:/home/sskcpclient -v $log_path/$port:/home/kcplog --name router_kcp_$port kcpclient-x86:test
+
+}
+
+case "$1" in
+  start)
+    port="$2"
+    [ "$port" == "" ] && echo "Usage: $0 {start 1080|stop 1080|restart 1080|status}" && exit
+    START $port
+    ;;
+
+  stop)
+    port="$2"
+    [ "$port" == "" ] && echo "Usage: $0 {start 1080|stop 1080|restart 1080|status}" && exit
+    sudo rm -rf $path/$port
+    sudo rm -rf $log_path/$port
+    docker rm -f router_kcp_$port
+    ;;
+
+  restart)
+    port="$2"
+    [ "$port" == "" ] && echo "Usage: $0 {start 1080|stop 1080|restart 1080|status}" && exit
+    docker rm -f router_kcp_$port
+    sudo rm -rf $log_path/$port
+    sudo rm -rf $path/$port
+    START $port 
+    ;;
+
+  status)
+    echo ""
+    echo "------------------------ kcp status --------------------------"
+    docker ps -a | grep kcp
+    echo ""
+    sudo netstat -ltunp | grep ss-redir
+    sudo netstat -ltunp | grep pen
+    sudo netstat -ltunp | grep client_linux
+    ;; 
+
+  *)
+    echo $"Usage: $0 {start 1080|stop 1080|restart 1080|status}"
+    exit 1
+
+esac

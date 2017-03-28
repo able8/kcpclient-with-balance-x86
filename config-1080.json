@@ -5,28 +5,28 @@
 			"remoteaddr": "123.123.123.123:4000",
 			"key": "testkcp",
 			"mode": "fast2",
-			"snmplog":"kcp1-20060102.log"
+			"snmplog":"/home/kcplog/kcp1-20060102.log"
 		},
 		"kcp2":{
 			"localaddr": "127.0.0.1:2002",
 			"remoteaddr": "123.123.123.123:4000",
 			"key": "testkcp",
 			"mode": "fast2",
-			"snmplog":"kcp2-20060102.log"
+			"snmplog":"/home/kcplog/kcp2-20060102.log"
 		},
 		"kcp3":{
 			"localaddr": "127.0.0.1:2003",
 			"remoteaddr": "123.123.123.123:4000",
 			"key": "testkcp",
 			"mode": "fast2",
-			"snmplog":"kcp3-20060102.log"
+			"snmplog":"/home/kcplog/kcp3-20060102.log"
 		},
 		"kcp4":{
 			"localaddr": "127.0.0.1:2004",
 			"remoteaddr": "123.123.123.123:4000",
 			"key": "testkcp",
 			"mode": "fast2",
-			"snmplog":"kcp4-20060102.log"
+			"snmplog":"/home/kcplog/kcp4-20060102.log"
 		}
 	},
 	"pen":{
