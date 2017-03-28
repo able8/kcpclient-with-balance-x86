@@ -42,7 +42,7 @@ ENV PEN_URL http://siag.nu/pub/pen/pen-$PEN_VER.tar.gz
 ENV PEN_DIR /pen-$PEN_VER
 ENV PEN_DEP build-base autoconf automake gcc make
 
-ENV KCP_VER 20170315
+ENV KCP_VER 20170322
 ENV KCP_URL https://github.com/xtaci/kcptun/releases/download/v$KCP_VER/kcptun-linux-amd64-$KCP_VER.tar.gz
 
 
@@ -72,8 +72,6 @@ RUN apk add --update $PEN_DEP && \
 
 # clean build dependency
 WORKDIR /
-RUN rm -rf $PEN_DIR && \
-    rm -rf $SS_DIR
-
+RUN rm -rf $PEN_DIR
 ADD init ./
 ENTRYPOINT ./init

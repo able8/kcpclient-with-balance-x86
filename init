@@ -4,49 +4,66 @@ from subprocess import call
 import shlex
 import os.path
 
-path = "/home/kcpclient/"
-ss_config_file = path + "shadowsocks.json"
-pen_config_file = path + "pen.json"
-kcp_max_number = 4
+path = "/home/sskcpclient/"
+CONFIG_FILE = path + "config.json"
+SS_CF_FILE = path + "ss.cfg"
+
 
 def command_runner(_cmdlist):
-    # TODO
-    for key in sorted(_cmdlist.iterkeys()):
-      print "calling " + key
-      call(_cmdlist[key], shell=True) 
+	# TODO
+	for key in sorted(_cmdlist.iterkeys()):
+		print "calling " + key
+		print _cmdlist[key]
+		call(_cmdlist[key], shell=True) 
+
+def loadConfig(config_file):
+	if os.path.isfile(config_file) == False:
+		print "File " + config_file + " Not Found!"
+		config = {}
+	else:
+		config = json.loads(open(config_file).read())
+	return config
+
+def generatePenCMD(config):
+	max_conn = config["pen"]["max_connection"]
+	balancer =[v["localaddr"] for k,v in config["kcp"].items()]
+	port = str(config["ss"]["server_port"])
+	pen_cmd = "pen -f -r -x " + max_conn + " 127.0.0.1:" + port
+	for i in balancer:
+		pen_cmd = pen_cmd + " " + i 
+	return pen_cmd
+
+def generateKcpCF(config):
+	data = config["kcp"]
+	KcpCF = []
+	for k, datum in data.items():
+		filename = path + k + ".cfg"
+		with open(filename, 'w') as outfile:
+			json.dump(datum, outfile)
+			KcpCF.append(filename)
+	return KcpCF
+
+
+def generateShadowsocksCF(config):
+	data = config["ss"]
+	with open(SS_CF_FILE, 'w') as outfile:
+		json.dump(data, outfile)
 
 def command_generater():
-	if os.path.isfile(pen_config_file) == False:
-		print "File " + pen_config_file + " Not Found!"
-		return {}
-	if os.path.isfile(ss_config_file) == False:	
-		print "File " + ss_config_file + " Not Found!"
-		return {}
+	config = loadConfig(CONFIG_FILE)
 
 	_cmdlist = {}
 
-	# basic pen command
-	pen_config = json.loads(open(pen_config_file).read())
-	pen_cmd = "pen -f -r -x " + pen_config["max_connection"] + " 127.0.0.1:" + pen_config["port"]
+	# kcp cmd
+	kcp_cfgs = generateKcpCF(config)
+	for kcp_config_file in kcp_cfgs:
+		_cmdlist[kcp_config_file] = "client_linux_amd64 -c " + kcp_config_file + " &"
+	# pen cmd
+	_cmdlist["pen"] = generatePenCMD(config) + " &"
 
-	# generate kcp commands
-	i=1
-	while (i <= kcp_max_number):
-		kcp_name = "kcp" + str(i)
-		kcp_config_file = path + kcp_name + ".json"
-
-		if os.path.isfile(kcp_config_file):
-			kcp_config = json.loads(open(kcp_config_file).read())
-			_cmdlist[kcp_name] = "client_linux_amd64 -c " + kcp_config_file + " &"
-			pen_cmd = pen_cmd + " " + kcp_config["localaddr"]
-		i = i + 1
-
-	if len(_cmdlist) == 0:
-		print "No kcp config file found in " + path + " !"
-		return {}
-
-	_cmdlist["pen"] = pen_cmd + " &"
-	_cmdlist["ss"] = "ss-redir -c " + ss_config_file
+	# ss cmd
+	generateShadowsocksCF(config)
+	_cmdlist["ss"] = "ss-redir -c " + SS_CF_FILE
 
 	return _cmdlist
 
