@@ -7,7 +7,7 @@ START() {
   sudo mkdir -p $path/$port/
   sudo cp `pwd`/config-$port.json $path/$port/config.json
 
-  docker run -itd --privileged --restart=always --cap-add=NET_ADMIN --net=host -v $path/$port:/home/sskcpclient -v $log_path/$port:/home/kcplog --name router_kcp_$port dorrypizza/kcpclient-with-balance-x86:test
+  docker run -itd --privileged --restart=always --cap-add=NET_ADMIN --net=host -v $path/$port:/home/sskcpclient -v $log_path/$port:/home/kcplog --name router_kcp_$port dorrychocolate/kcpclient-with-balance-x86:test
 
 
 
