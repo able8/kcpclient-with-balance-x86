@@ -1,15 +1,35 @@
 # kcpclient-with-balance-x86
-It starts one shadowsocks client, and no more than 4 `xtaci/kcptun` clients and uses `pen` to balance network flow, with config file `dorry_data/kcpclient/kcp1.json`, `/dorry_data/kcpclient/pen.json` and `/dorry_data/kcpclient/shadowsocks.json`.
-
 [kcp config file format ](https://github.com/xtaci/kcptun/blob/master/README-CN.md)
 
 [shadowsocks config file format](https://github.com/shadowsocks/shadowsocks/wiki/Configuration-via-Config-File)
 
 ##  Versions
- - shadowsocks: 2.5.6
- - kcptun: 20170315
+ - shadowsocks: 3.0.3
+ - kcptun: 20170322
 
 ## How to use?
+
+### Fetch the code
 ```
-docker run -itd --privileged --restart=always --cap-add=NET_ADMIN --net=host -v /dorry_data/kcpclient:/home/kcpclient --name router_kcp dorrypizza/kcpclient-with-balance-x86
+git clone git@github.com:LaoLuMian/kcpclient-with-balance-x86.git
+```
+
+### Modify configuration of ss, kcp, pen
+```
+vim config-1080.json
+```
+
+### Run
+```
+./kcp-control start 1080
+```
+
+### Stop
+```
+./kcp-control stop 1080
+```
+
+### Restart
+```
+./kcp-control restart 1080
 ```

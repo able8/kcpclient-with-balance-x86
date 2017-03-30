@@ -3,9 +3,6 @@ FROM alpine:3.4
 # build shadowsocks-libev
 ENV SS_VER 3.0.3 
 ENV SS_URL https://github.com/shadowsocks/shadowsocks-libev/releases/download/v$SS_VER/shadowsocks-libev-$SS_VER.tar.gz 
-#RUN echo "http://dl-6.alpinelinux.org/alpine/v3.4/community" >> /etc/apk/repositories && \
-#    echo "http://dl-6.alpinelinux.org/alpine/v3.4/main" >> /etc/apk/repositories
-#RUN apk update
 RUN set -ex && \
     apk add --update --no-cache --virtual .build-deps \
                                 autoconf \
